@@ -3,6 +3,7 @@ package com.practice.demo.secureapp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,6 +21,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 	@Autowired
 	private UserDetailsService userDetailsService;
 	
+	@Autowired
+	private AuthenticationEntryPoint authEntryPoint;
+	
 	@Bean
 	public AuthenticationProvider authProvider() {
 		DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -31,18 +35,28 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
+//		http
+//		.csrf().disable()
+//		.authorizeRequests().antMatchers("/login").permitAll()
+//		.anyRequest().authenticated()
+//		.and()
+//		.formLogin()
+//		.loginPage("/login").permitAll()
+//		.and()
+//		.logout().invalidateHttpSession(true)
+//		.clearAuthentication(true)
+//		.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+//		.logoutSuccessUrl("/logout-success").permitAll();
 		http
 		.csrf().disable()
-		.authorizeRequests().antMatchers("/login").permitAll()
-		.anyRequest().authenticated()
+		.authorizeRequests()
+		.antMatchers("/","/api/public/**")
+		.permitAll()
+		.anyRequest()
+		.authenticated()
 		.and()
-		.formLogin()
-		.loginPage("/login").permitAll()
-		.and()
-		.logout().invalidateHttpSession(true)
-		.clearAuthentication(true)
-		.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-		.logoutSuccessUrl("/logout-success").permitAll();
+		.httpBasic()
+		.authenticationEntryPoint(authEntryPoint);
 	}
 	
 	
